@@ -16,7 +16,7 @@ import NavBar from './layouts/NavBar'
 function App () {
   const client = new ApolloClient({
     cache: new InMemoryCache(),
-    uri: 'http://localhost:3000/'
+    uri: 'https://streaming-platform-backend-production.up.railway.app'
   })
   return (
     <Router>
