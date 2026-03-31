@@ -15,8 +15,7 @@ import userContainer from '../config/UserStore'
 const SearchedMovies = () => {
   const navigate = useNavigate()
   const searchedMovies = searchedMoviesContainer((state) => state.searchedMovies.searchedMovies)
-  const getAuthorization = userContainer((state) => state.isAuthorized)
-  const isAuthorized = getAuthorization.isAuthorized
+  const isAuthorized = userContainer((state) => state.isAuthorized)
 
   useEffect(() => {
     if (isAuthorized !== true) {

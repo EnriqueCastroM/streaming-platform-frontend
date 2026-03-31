@@ -1,16 +1,7 @@
-// React
 import { useState } from 'react'
-
-// React Router Dom
 import { useNavigate } from 'react-router-dom'
-
-// Apollo/client
 import { useMutation } from '@apollo/client'
-
-// Mutation
 import { CREATE_MOVIE } from '../graphql/Mutation'
-
-// Query
 import { GET_MOVIES } from '../graphql/Queries'
 
 const MovieForm = () => {
@@ -20,91 +11,101 @@ const MovieForm = () => {
   const [description, setDescription] = useState('')
   const [image, setImage] = useState('')
   const [dateOfReleased, setDateOfReleased] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const [createMovie] = useMutation(CREATE_MOVIE, {
     refetchQueries: [{ query: GET_MOVIES }]
   })
 
   return (
-    <section className='flex flex-col items-center justify-center h-screen mt-8'>
-      <div className='sm:w-80 md:w-80 lg:w-96 bg-white rounded-lg'>
-        <div className='p-6 space-y-6'>
-          <h1 className='text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white text-center'>
-            Create Movie
+    <section className="min-h-screen bg-gray-100 dark:bg-black flex items-center justify-center px-4 pt-24">
+      <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+        <div className="p-6 space-y-6">
+
+          <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+            Add New Movie
           </h1>
+
           <form
+            className="space-y-4"
             onSubmit={async (e) => {
               e.preventDefault()
-              await createMovie({ variables: { title, description, image, dateOfReleased } })
+              setLoading(true)
+
+              await createMovie({
+                variables: {
+                  title,
+                  description,
+                  image,
+                  dateOfReleased
+                }
+              })
+
+              setLoading(false)
               navigate('/home')
             }}
-            className='space-y-4 md:space-y-6'
           >
             <div>
-              <label
-                className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
-              >
-                Title
+              <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white">
+                Movie Title
               </label>
               <input
+                type="text"
+                value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                type='text'
-                name='title'
-                id='title'
-                className='bg-gray-200 border border-gray-200 text-gray-900 sm:text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                className="w-full rounded bg-gray-200 dark:bg-gray-700 px-3 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-600"
+                placeholder="Interstellar"
                 required
               />
             </div>
+
             <div>
-              <label
-                className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
-              >
+              <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white">
                 Description
               </label>
-              <input
+              <textarea
+                value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                type='text'
-                name='description'
-                id='description'
-                className='bg-gray-200 border border-gray-200 text-gray-900 sm:text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                className="w-full rounded bg-gray-200 dark:bg-gray-700 px-3 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-600 resize-none"
+                rows={3}
+                placeholder="A team travels through a wormhole to save humanity..."
                 required
               />
             </div>
+
             <div>
-              <label
-                className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
-              >
-                Image
+              <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white">
+                Image URL
               </label>
               <input
+                type="url"
+                value={image}
                 onChange={(e) => setImage(e.target.value)}
-                type='text'
-                name='image'
-                id='image'
-                className='bg-gray-200 border border-gray-200 text-gray-900 sm:text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                className="w-full rounded bg-gray-200 dark:bg-gray-700 px-3 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-600"
+                placeholder="https://image.tmdb.org/t/p/w500/..."
                 required
               />
             </div>
+
             <div>
-              <label
-                className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
-              >
-                Date of released
+              <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white">
+                Release Date
               </label>
               <input
+                type="date"
+                value={dateOfReleased}
                 onChange={(e) => setDateOfReleased(e.target.value)}
-                type='date'
-                name='dateOfReleased'
-                id='dateOfReleased'
-                className='bg-gray-200 border border-gray-200 text-gray-900 sm:text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                className="w-full rounded bg-gray-200 dark:bg-gray-700 px-3 py-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-600"
                 required
               />
             </div>
+
             <button
-              type='submit'
-              className='w-full text-white bg-amber-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-base px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800'
+              type="submit"
+              disabled={loading}
+              className="w-full rounded bg-amber-600 py-2.5 font-semibold text-white hover:bg-amber-700 transition disabled:opacity-70"
             >
-              Create
+              {loading ? 'Creating movie...' : 'Create Movie'}
             </button>
           </form>
         </div>

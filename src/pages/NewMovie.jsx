@@ -13,8 +13,7 @@ import MovieForm from '../components/MovieForm'
 const NewMovie = () => {
   const navigate = useNavigate()
 
-  const getAuthorization = userContainer((state) => state.isAuthorized)
-  const isAuthorized = getAuthorization.isAuthorized
+  const isAuthorized = userContainer((state) => state.isAuthorized)
 
   useEffect(() => {
     if (isAuthorized !== true) {

@@ -1,106 +1,125 @@
-// React
 import { useState } from 'react'
-
-// React Router Dom
 import { useNavigate } from 'react-router-dom'
-
-// Query and Apollo Client
+import { useLazyQuery } from '@apollo/client'
 import { LOGIN } from '../graphql/Queries'
-import { useLazyQuery } from '@apollo/client/react'
-
-// Zustand
-import userContainer from '../config/UserStore.js'
-
-// Assets
+import userContainer from '../config/UserStore'
 import Logo from '../assets/AmazonPrimeVideoLogo.png'
 
 const LoginForm = () => {
   const navigate = useNavigate()
   const addAuthorization = userContainer((state) => state.addAuthorization)
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [invalidCredentials, setInvalidCredentials] = useState(false)
+  // ✅ Credenciales demo (mejor UX)
+  const [email, setEmail] = useState('admin@admin.com')
+  const [password, setPassword] = useState('123456')
 
-  // eslint-disable-next-line no-unused-vars
-  const [login, { data, error }] = useLazyQuery(LOGIN, {
-    variables: { email, password }
+  const [invalidCredentials, setInvalidCredentials] = useState(false)
+  const [loadingLogin, setLoadingLogin] = useState(false)
+
+  // ✅ Lazy query limpio (sin variables hardcodeadas)
+  const [login] = useLazyQuery(LOGIN, {
+    fetchPolicy: 'no-cache'
   })
 
-  return (
-    <section className='flex flex-col items-center justify-center h-screen'>
-      <div className='flex items-center mb-10'>
-        <img className='w-full h-10 sm:h-14' src={Logo} alt='logo' />
-      </div>
-      <div className='sm:w-80 md:w-80 lg:w-96 bg-white rounded-lg'>
-        <div className='p-6 space-y-6'>
-          <h1 className='text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white text-center'>
-            Sign-in
-          </h1>
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setInvalidCredentials(false)
+    setLoadingLogin(true)
 
-              // Excecute login Query
-              await login().then(function (response) {
-                if (response.data.login === 'Ok User') {
-                  addAuthorization()
-                  navigate('/home')
-                } else {
-                  setInvalidCredentials(true)
-                }
-              })
-            }}
-            className='space-y-4 md:space-y-6'
-          >
-            <div>
-              <label
-                htmlFor='email'
-                className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
-              >
-                E-mail
-              </label>
-              <input
-                type='email'
-                name='email'
-                id='email'
-                onChange={(e) => {
-                  setEmail(e.target.value)
-                }}
-                className='bg-gray-200 border border-gray-200 text-gray-900 sm:text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-                required
-              />
+    try {
+      const { data } = await login({
+        variables: { email, password }
+      })
+
+      if (data?.login) {
+        // ✅ data.login = JWT
+        addAuthorization(data.login)
+        navigate('/home')
+      } else {
+        setInvalidCredentials(true)
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      setInvalidCredentials(true)
+    } finally {
+      setLoadingLogin(false)
+    }
+  }
+
+  return (
+    <section className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-black px-4">
+      <div className="w-full max-w-md">
+        {/* LOGO */}
+        <div className="mb-8 flex justify-center">
+          <img
+            src={Logo}
+            alt="Amazon Prime Video"
+            className="h-14 object-contain"
+          />
+        </div>
+
+        {/* CARD */}
+        <div className="rounded-lg bg-white dark:bg-gray-900 shadow-lg">
+          <div className="p-6 space-y-6">
+            <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+              Sign in
+            </h1>
+
+            {/* DEMO INFO */}
+            <div className="rounded-md bg-gray-100 dark:bg-gray-800 p-3 text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Demo credentials
+              </p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                admin@admin.com / 123456
+              </p>
             </div>
-            <div>
-              <label
-                htmlFor='password'
-                className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
+
+            {/* FORM */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-900 dark:text-white">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded bg-gray-200 dark:bg-gray-700 px-3 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-600"
+                  placeholder="admin@admin.com"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-900 dark:text-white">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded bg-gray-200 dark:bg-gray-700 px-3 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-600"
+                  placeholder="******"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loadingLogin}
+                className="w-full rounded bg-amber-600 py-2.5 font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Password
-              </label>
-              <input
-                type='password'
-                name='password'
-                id='password'
-                onChange={(e) => {
-                  setPassword(e.target.value)
-                }}
-                className='bg-gray-200 border border-gray-200 text-gray-900 sm:text-sm focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-                required
-              />
-            </div>
-            <button
-              type='submit'
-              className='w-full text-white bg-amber-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-base px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800'
-            >
-              Login
-            </button>
-            {invalidCredentials && (
-              <h1 className='text-base font-semibold leading-tight text-red-600 text-center'>
-                Invalid Credentials!
-              </h1>
-            )}
-          </form>
+                {loadingLogin ? 'Signing in…' : 'Login'}
+              </button>
+
+              {invalidCredentials && (
+                <p className="text-center text-sm font-semibold text-red-600">
+                  Invalid email or password
+                </p>
+              )}
+            </form>
+          </div>
         </div>
       </div>
     </section>
