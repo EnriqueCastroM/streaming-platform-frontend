@@ -2,9 +2,9 @@ import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 import userContainer from '../config/UserStore'
 
-// ✅ Endpoint CORRECTO de GraphQL
+// ✅ Endpoint CORRECTO del backend
 const httpLink = createHttpLink({
-  uri: 'http://localhost:3000'
+  uri: 'https://streaming-platform-backend-9cu8.onrender.com'
 })
 
 // ✅ Adjunta JWT automáticamente a cada request
